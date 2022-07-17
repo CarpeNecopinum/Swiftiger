@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Swiftiger",
+            "program": ".build/debug/Swiftiger",
+            "args": [],
+            "cwd": "${workspaceFolder:Swiftiger}",
+            "preLaunchTask": "swift: Build Debug Swiftiger"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release Swiftiger",
+            "program": ".build/release/Swiftiger",
+            "args": [],
+            "cwd": "${workspaceFolder:Swiftiger}",
+            "preLaunchTask": "swift: Build Release Swiftiger"
+        }
+    ]
+}
