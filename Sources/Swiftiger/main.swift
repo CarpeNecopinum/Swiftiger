@@ -1,22 +1,20 @@
-import Swifter
+import Kitura
 import Dispatch
 
-let server = HttpServer()
+let router = Router()
 
-server["/"] = scopes { 
-  html {
-    body {
-      h1 { inner = "Hello World!" }
-    }
-  }
+router.get("/") {
+    request, response, next in
+    response.send("Hello, World!")
+    next()
 }
 
-let semaphore = DispatchSemaphore(value: 0)
-do {
-  try server.start(9080, forceIPv4: true)
-  print("Server has started ( port = \(try server.port()) ). Try to connect now...")
-  semaphore.wait()
-} catch {
-  print("Server start error: \(error)")
-  semaphore.signal()
+router.get("/devices/list") {
+    request, response, next in
+    let devices = try Device.getAll()
+    response.send(json: devices)
+    next()
 }
+
+Kitura.addHTTPServer(onPort: 3000, with: router)
+Kitura.run()

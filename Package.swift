@@ -7,7 +7,7 @@ let package = Package(
     name: "Swiftiger",
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/httpswift/swifter.git", .upToNextMajor(from: "1.5.0")),
+        .package(url: "https://github.com/Kitura/Kitura", from: "2.8.0"),
         .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.3")
     ],
     targets: [
@@ -16,7 +16,7 @@ let package = Package(
         .executableTarget(
             name: "Swiftiger",
             dependencies: [
-                .product(name: "Swifter", package: "swifter"),
+                .product(name: "Kitura", package: "kitura"),
                 .product(name: "SQLite", package: "SQLite.swift")                
             ]),
         .testTarget(
