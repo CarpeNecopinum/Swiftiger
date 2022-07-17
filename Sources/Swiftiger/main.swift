@@ -1,22 +1,22 @@
-import Swifter
+import Vapor
 import Dispatch
+import class Foundation.JSONEncoder
 
-let server = HttpServer()
+try! Device.setupDb()
 
-server["/"] = scopes { 
-  html {
-    body {
-      h1 { inner = "Hello World!" }
-    }
-  }
+var env = try Environment.detect()
+try LoggingSystem.bootstrap(from: &env)
+
+let app = Application(env)
+defer { app.shutdown() }
+
+app.get { req in
+    return "Hello, world!"
 }
 
-let semaphore = DispatchSemaphore(value: 0)
-do {
-  try server.start(9080, forceIPv4: true)
-  print("Server has started ( port = \(try server.port()) ). Try to connect now...")
-  semaphore.wait()
-} catch {
-  print("Server start error: \(error)")
-  semaphore.signal()
+app.get("devices", "list") { req in
+    return try Device.getAll()
 }
+
+app.http.server.configuration.port = 3000
+try app.run()
