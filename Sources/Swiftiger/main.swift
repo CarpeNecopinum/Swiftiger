@@ -1,9 +1,14 @@
 import Swifter
 import Dispatch
+import Foundation
 
 let server = HttpServer()
 
-server["/"] = scopes { 
+let encoder = JSONEncoder()
+encoder.outputFormatting = .prettyPrinted
+let decoder = JSONDecoder()
+
+server.GET["/"] = scopes { 
   html {
     body {
       h1 { inner = "Hello World!" }
@@ -11,12 +16,49 @@ server["/"] = scopes {
   }
 }
 
+server.GET["/devices/list"] = { request in
+    do {
+        let devices = try Device.getAll()
+        let json = try encoder.encode(devices)
+        return HttpResponse.ok(.data(json, contentType: "application/json"))
+    } catch {
+        return HttpResponse.internalServerError
+    }
+}
+
+struct ExecutePostRequest: Decodable {
+    let device_id: Int64
+    // command: parsed in the actor
+}
+
+server.POST["/devices/execute"] = { request in
+    do {
+        let data = Data(request.body)
+        let body = try decoder.decode(ExecutePostRequest.self, from: data)
+        let device = try Device.get(device_id: body.device_id)
+
+        let actor = actor_by_name(name: device.actor)
+        if let actor = actor {
+            try actor.execute(command: data, actor_data: device.actor_data.data(using: .utf8)!)
+        } else {
+            return HttpResponse.notFound
+        }
+
+        return HttpResponse.ok(.text("OK"))
+    } catch {
+        print("Error \(error)")
+        return HttpResponse.internalServerError
+    }
+}
+
+server.GET["/test/devices/execute"] = shareFile("./static/devices_execute.html")
+
 let semaphore = DispatchSemaphore(value: 0)
 do {
-  try server.start(9080, forceIPv4: true)
-  print("Server has started ( port = \(try server.port()) ). Try to connect now...")
-  semaphore.wait()
+    try server.start(3000)
+    print("Server has started ( port = \(try server.port()) ). Try to connect now...")
+    semaphore.wait()
 } catch {
-  print("Server start error: \(error)")
-  semaphore.signal()
+    print("Server start error: \(error)")
+    semaphore.signal()
 }
