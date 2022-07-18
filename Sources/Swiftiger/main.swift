@@ -9,11 +9,14 @@ encoder.outputFormatting = .prettyPrinted
 let decoder = JSONDecoder()
 
 server.GET["/"] = { r in
-    return HttpResponse.movedPermanently("/index.html")
+    return HttpResponse.movedPermanently("/static/index.html")
 }
 
 let env = ProcessInfo.processInfo.environment
-server["/static/:path"] = directoryBrowser(env["WWW_ROOT"] ?? "./static")
+let static_server = serveStatic(env["WWW_ROOT"] ?? "./static", prefix: "/static/")
+server["/static/:a"] = static_server
+server["/static/:a/:b"] = static_server
+server["/static/:a/:b/:c"] = static_server
 
 server.GET["/devices/list"] = { request in
     do {
