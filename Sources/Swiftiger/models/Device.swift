@@ -7,21 +7,23 @@ struct Device: Codable {
     static let kind = Expression<String>("kind")
     static let actor = Expression<String>("actor")
     static let actor_data = Expression<String>("actor_data")
+    static let state = Expression<String>("state")
 
     var id: Int64
     var name: String
     var kind: String
     var actor: String
     var actor_data: String
+    var state: String
 
     static func getAll() throws -> [Device] {
-        let devices = table.select(id, name, kind, actor, actor_data)
+        let devices = table.select(*)
         let rows = try db.prepare(devices)
         var result = [Device]()
         for row in rows {
             result.append(Device(
                 id: row[id], name: row[name], kind: row[kind], 
-                actor: row[actor], actor_data: row[actor_data]))
+                actor: row[actor], actor_data: row[actor_data], state: row[state]))
         }
         return result
     }
@@ -34,7 +36,7 @@ struct Device: Codable {
         }
         return Device(
             id: row[id], name: row[name], kind: row[kind], 
-            actor: row[actor], actor_data: row[actor_data])
+            actor: row[actor], actor_data: row[actor_data], state: row[state])
     }
 
     static func setupDb() throws {
@@ -44,6 +46,14 @@ struct Device: Codable {
             t.column(kind)
             t.column(actor)
             t.column(actor_data)
+            t.column(state)
         })
+    }
+
+    func updateState(state: String) throws {
+        let update = Device.table
+            .filter(Device.id == self.id)
+            .update(Device.state <- state)
+        try db.run(update)
     }
 }

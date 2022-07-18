@@ -39,7 +39,7 @@ server.POST["/devices/execute"] = { request in
 
         let actor = actor_by_name(name: device.actor)
         if let actor = actor {
-            try actor.execute(command: data, actor_data: device.actor_data.data(using: .utf8)!)
+            try actor.execute(command: data, device: device)
         } else {
             return HttpResponse.notFound
         }

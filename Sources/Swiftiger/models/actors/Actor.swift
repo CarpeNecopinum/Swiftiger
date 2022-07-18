@@ -1,7 +1,7 @@
 import Foundation
 
 protocol Actor {
-    func execute(command: Data, actor_data: Data) throws
+    func execute(command: Data, device: Device) throws
 }
 
 func actor_by_name(name: String) -> Actor? {

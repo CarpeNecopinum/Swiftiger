@@ -8,13 +8,28 @@ struct Sender433ExecuteRequest: Decodable {
 struct Sender433ActorData: Decodable {
     let code_on: String
     let code_off: String
+    let `protocol`: Int32?
+    let pulselength: Int32?
 }
 
 class Sender433: Actor {
-    func execute(command: Data, actor_data: Data) throws {
-        let body = try decoder.decode(Sender433ExecuteRequest.self, from: command)
-        let data = try decoder.decode(Sender433ActorData.self, from: actor_data)
+    func execute(command: Data, device: Device) throws {
+        let body = try decoder
+            .decode(Sender433ExecuteRequest.self, from: command)
+        let data = try decoder
+            .decode(Sender433ActorData.self, from: device.actor_data.data(using: .utf8)!)
 
-        print("Executing command for device \(body.command) with code_on \(data.code_on) and code_off \(data.code_off)")
+        let target_state = body.command == "on"
+
+        let code = target_state ? data.code_on : data.code_off
+        
+        try Process.run(URL(fileURLWithPath: "/usr/bin/env"), arguments: [
+            "codesend",
+            code,
+            "\(data.protocol ?? 4)",
+            data.pulselength != nil ? "\(data.pulselength!)" : ""
+        ]).waitUntilExit()
+
+        try device.updateState(state: target_state ? "on" : "off")
     }
 }
