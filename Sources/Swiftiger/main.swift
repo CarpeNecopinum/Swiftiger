@@ -8,13 +8,12 @@ let encoder = JSONEncoder()
 encoder.outputFormatting = .prettyPrinted
 let decoder = JSONDecoder()
 
-server.GET["/"] = scopes { 
-  html {
-    body {
-      h1 { inner = "Hello World!" }
-    }
-  }
+server.GET["/"] = { r in
+    return HttpResponse.movedPermanently("/index.html")
 }
+
+let env = ProcessInfo.processInfo.environment
+server["/static/:path"] = directoryBrowser(env["WWW_ROOT"] ?? "./static")
 
 server.GET["/devices/list"] = { request in
     do {
@@ -50,8 +49,6 @@ server.POST["/devices/execute"] = { request in
         return HttpResponse.internalServerError
     }
 }
-
-server.GET["/test/devices/execute"] = shareFile("./static/devices_execute.html")
 
 let semaphore = DispatchSemaphore(value: 0)
 do {
