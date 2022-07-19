@@ -85,7 +85,8 @@ if (try Device.getAll().count == 0) {
 
 let semaphore = DispatchSemaphore(value: 0)
 do {
-    try server.start(3000)
+    server.listenAddressIPv4 = "0.0.0.0"
+    try server.start(3000, forceIPv4: true)
     print("Server has started ( port = \(try server.port()) ). Try to connect now...")
     semaphore.wait()
 } catch {
