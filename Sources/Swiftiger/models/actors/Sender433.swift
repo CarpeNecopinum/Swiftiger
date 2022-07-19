@@ -1,25 +1,32 @@
 import Foundation
 
-struct Sender433ExecuteRequest: Decodable {
-    // let device_id: Int64 - don't really care here
-    let command: String
-}
+struct Sender433ActorData: Codable {
+    var code_on: String
+    var code_off: String
+    var `protocol`: Int32? = nil
+    var pulselength: Int32? = nil
 
-struct Sender433ActorData: Decodable {
-    let code_on: String
-    let code_off: String
-    let `protocol`: Int32?
-    let pulselength: Int32?
+    func stringify() -> String {
+        let data = try! JSONEncoder().encode(self)
+        return String(data: data, encoding: .utf8)!
+    }
 }
 
 class Sender433: Actor {
-    func execute(command: Data, device: Device) throws {
-        let body = try decoder
-            .decode(Sender433ExecuteRequest.self, from: command)
+    func executeOn(_ device: Device, trait: String, command: String) throws {
+        let trait = device.traits.first { $0.name == trait }
+        guard (trait != nil && trait!.name == "OnOff") else {
+            throw ActorError.invalidTrait
+        }
+
         let data = try decoder
             .decode(Sender433ActorData.self, from: device.actor_data.data(using: .utf8)!)
 
-        let target_state = body.command == "on"
+        let command = command.lowercased()
+        let target_state = command == "on"
+        if (!target_state && command != "off") {
+            throw ActorError.invalidCommand
+        }
 
         let code = target_state ? data.code_on : data.code_off
         
@@ -30,6 +37,16 @@ class Sender433: Actor {
             data.pulselength != nil ? "\(data.pulselength!)" : ""
         ]).waitUntilExit()
 
-        try device.updateState(state: target_state ? "on" : "off")
+        try trait!.updateState(state: target_state ? "on" : "off")
+    }
+
+    func buildDevice(_ name: String, kind: String, actor_data: String) throws -> Device {
+        let traits = [
+            Trait(name: "OnOff", state: "off")
+        ]
+
+        return Device(
+            name: name, kind: kind, actor: "Sender433", 
+            actor_data: actor_data, traits: traits)
     }
 }
