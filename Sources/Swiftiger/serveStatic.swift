@@ -33,3 +33,16 @@ public func serveStatic(_ directoryPath: String, prefix: String) -> ((HttpReques
         return .notFound
     }
 }
+
+func registerStaticRoutes(_ server: HttpServer) {
+    let env = ProcessInfo.processInfo.environment
+    let static_server = serveStatic(env["WWW_ROOT"] ?? "./static", prefix: "/static/")
+    
+    server["/static/:a"] = static_server
+    server["/static/:a/:b"] = static_server
+    server["/static/:a/:b/:c"] = static_server
+
+    server.GET["/"] = { r in
+        return HttpResponse.movedPermanently("/static/index.html")
+    }
+}
