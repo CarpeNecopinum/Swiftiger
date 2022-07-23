@@ -37,4 +37,18 @@ func registerDeviceRoutes(_ server: HttpServer) {
             return HttpResponse.internalServerError
         }
     }
+
+    server.POST["/devices/save"] = { request in 
+        do {
+            let data = Data(request.body)
+            var body = try decoder.decode(Device.self, from: data)
+
+            try body.save()
+
+            return HttpResponse.ok(.text("OK"))
+        } catch {
+            print("Error \(error)")
+            return HttpResponse.internalServerError
+        }
+    }
 }

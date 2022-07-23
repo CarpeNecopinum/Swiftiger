@@ -86,22 +86,21 @@ struct Device: Codable {
         })
     }
 
-    func save() throws {
-        var device_id: Int64!;
+    mutating func save() throws {
         if let new_id = self.id {
             try db.run(Device.table.insert(or: .replace,
             Device.id <- new_id, Device.name <- name, Device.kind <- kind, 
             Device.actor <- actor, Device.actor_data <- actor_data))
-            device_id = new_id
         } else {
-            device_id = try db.run(Device.table.insert(or: .replace,
+            self.id = try db.run(Device.table.insert(or: .replace,
             Device.name <- name, Device.kind <- kind, 
             Device.actor <- actor, Device.actor_data <- actor_data))
         }
 
+        try db.run(Trait.table.filter(Trait.device_id == self.id!).drop())
         try db.run(Trait.table.insertMany(traits.map { trait in
             return [
-                Trait.device_id <- device_id,
+                Trait.device_id <- self.id!,
                 Trait.name <- trait.name,
                 Trait.state <- trait.state 
             ]

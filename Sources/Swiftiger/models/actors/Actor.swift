@@ -2,7 +2,6 @@ import Foundation
 
 protocol Actor {
     func executeOn(_ device: Device, trait: String, command: String) throws
-    func buildDevice(_ name: String, kind: String, actor_data: String) throws -> Device
 }
 
 enum ActorError: Error {

@@ -8,40 +8,13 @@ try Group.setupDb()
 let server = HttpServer()
 
 let encoder = JSONEncoder()
-encoder.outputFormatting = .prettyPrinted
+encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 let decoder = JSONDecoder()
 
 
 registerStaticRoutes(server)
 registerDeviceRoutes(server)
 registerGroupRoutes(server)
-
-if (try Device.getAll().count == 0) {
-    try Sender433().buildDevice("Stecker 1A", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "14088368", code_off: "14107552").stringify()).save()
-    try Sender433().buildDevice("Stecker 1B", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "14088372", code_off: "14107556").stringify()).save()
-    try Sender433().buildDevice("Stecker 1C", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "14088380", code_off: "14107564").stringify()).save()
-    try Sender433().buildDevice("Stecker 1D", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "14107554", code_off: "14088370").stringify()).save()
-    try Sender433().buildDevice("Stecker 2A", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "12882032", code_off: "12776720").stringify()).save()
-    try Sender433().buildDevice("Stecker 2B", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "12882036", code_off: "13560228").stringify()).save()
-    try Sender433().buildDevice("Stecker 2C", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "12882044", code_off: "13560236").stringify()).save()
-    try Sender433().buildDevice("Stecker 2D", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "13560226", code_off: "12882034").stringify()).save()
-    try Sender433().buildDevice("Stecker 3A", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "772976", code_off: "438928").stringify()).save()
-    try Sender433().buildDevice("Stecker 3B", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "906036", code_off: "438932").stringify()).save()
-    try Sender433().buildDevice("Stecker 3C", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "906044", code_off: "438940").stringify()).save()
-    try Sender433().buildDevice("Stecker 3D", kind: "outlet", 
-        actor_data: Sender433ActorData(code_on: "438930", code_off: "772978").stringify()).save()
-}
 
 let semaphore = DispatchSemaphore(value: 0)
 do {

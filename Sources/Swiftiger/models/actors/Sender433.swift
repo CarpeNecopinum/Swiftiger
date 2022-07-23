@@ -39,14 +39,4 @@ class Sender433: Actor {
 
         try trait!.updateState(state: target_state ? "on" : "off")
     }
-
-    func buildDevice(_ name: String, kind: String, actor_data: String) throws -> Device {
-        let traits = [
-            Trait(name: "OnOff", state: "off")
-        ]
-
-        return Device(
-            name: name, kind: kind, actor: "Sender433", 
-            actor_data: actor_data, traits: traits)
-    }
 }
