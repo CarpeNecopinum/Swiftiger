@@ -97,7 +97,7 @@ struct Device: Codable {
             Device.actor <- actor, Device.actor_data <- actor_data))
         }
 
-        try db.run(Trait.table.filter(Trait.device_id == self.id!).drop())
+        try db.run(Trait.table.filter(Trait.device_id == self.id!).delete())
         try db.run(Trait.table.insertMany(traits.map { trait in
             return [
                 Trait.device_id <- self.id!,
