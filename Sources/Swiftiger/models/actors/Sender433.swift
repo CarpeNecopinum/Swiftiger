@@ -1,5 +1,7 @@
 import Foundation
 
+let senderSemaphore = DispatchSemaphore(value: 1)
+
 struct Sender433ActorData: Codable {
     var code_on: String
     var code_off: String
@@ -30,12 +32,17 @@ class Sender433: Actor {
 
         let code = target_state ? data.code_on : data.code_off
         
-        try Process.run(URL(fileURLWithPath: "/usr/bin/env"), arguments: [
-            "codesend",
-            code,
-            "\(data.protocol ?? 4)",
-            data.pulselength != nil ? "\(data.pulselength!)" : ""
-        ]).waitUntilExit()
+        
+        do {
+            senderSemaphore.wait()
+            defer { senderSemaphore.signal() }
+            try Process.run(URL(fileURLWithPath: "/usr/bin/env"), arguments: [
+                "codesend",
+                code,
+                "\(data.protocol ?? 4)",
+                data.pulselength != nil ? "\(data.pulselength!)" : ""
+            ]).waitUntilExit() 
+        }
 
         try trait!.updateState(state: target_state ? "on" : "off")
     }
