@@ -13,6 +13,8 @@ func actor_by_name(name: String) -> Actor? {
     switch name {
     case "Sender433":
         return Sender433()
+    case "Computer":
+        return Computer()
     default:
         return nil
     }
